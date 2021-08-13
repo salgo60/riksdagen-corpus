@@ -94,53 +94,6 @@ def read_html(path):
     f.close()
     pretty_html = soup.prettify()
     return etree.fromstring(pretty_html)
-    
-def validate_xml_schema(xml_path, schema_path):
-    xml_file = lxml.etree.parse(xml_path)
-
-    schema = lxml.etree.XMLSchema(file=schema_path)
-    is_valid = schema.validate(xml_file)
-
-    return is_valid
-
-
-def parlaclarin_to_md(tree):
-    """
-    Convert Parla-Clarin XML to markdown. Returns a string.
-    """
-    return ""
-
-def parlaclarin_to_txt(tree):
-    """
-    Convert Parla-Clarin XML to plain text. Returns a string.
-    """
-    segments = tree.findall('.//seg')
-
-    for segment in segments:
-        etree.strip_tags(segment, 'seg')
-        #print(type(segment))
-    #return 
-    segment_txts = [etree.tostring(segment, pretty_print=True, encoding="UTF-8").decode("utf-8") for segment in segments]
-    segment_txts = [txt.replace("<seg>", "").replace("</seg>", "") for txt in segment_txts]
-
-    print(segment_txts[0])
-    print(type(segment_txts[0]))
-
-    return "\n".join(segment_txts)
-
-def speeches_with_name(tree, name):
-    """
-    Convert Parla-Clarin XML to plain text. Returns a string.
-    """
-    us = tree.findall('.//u')
-
-    texts = []
-    for u in us:
-        if name.lower() in u.attrib['who'].lower():
-            text = etree.tostring(u, pretty_print=True, encoding="UTF-8").decode("utf-8")
-            texts.append(text)
-        #print(type(segment))
-    return texts
 
 if __name__ == '__main__':
     validate_parla_clarin_example()

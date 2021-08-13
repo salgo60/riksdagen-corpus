@@ -11,19 +11,6 @@ from os.path import isfile, join
 from pyriksdagen.download import get_blocks, fetch_files
 from pyriksdagen.utils import infer_metadata
 from pyriksdagen.db import filter_db, year_iterator
-
-def _langmod_loss(sentence):
-    return 0.0
-
-def improvement(sentence, regexp):
-    """
-    Calculates the improvement in probability for a suggested text edit. Returns a tuple of losses.
-    """
-    sentence_suggestion = regexp
-    loss0 = _langmod_loss(sentence)
-    loss1 = _langmod_loss(sentence_suggestion)
-
-    return loss0, loss1
     
 def find_instances(root, pattern_db, c_hashes = dict()):
     """

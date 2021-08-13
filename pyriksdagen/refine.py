@@ -22,11 +22,6 @@ def _iter(root, ns="{http://www.tei-c.org/ns/1.0}"):
                     print(elem.tag)
                     yield None
 
-def random_classifier(paragraph):
-    alternatives = ["note", "u"]
-    return random.choice(alternatives)
-
-
 def detect_mps(root, names_ids, pattern_db, mp_db=None):
     """
     Re-detect MPs in a parla clarin protocol, based on the (updated)
@@ -173,100 +168,6 @@ def find_introductions(root, pattern_db, names_ids):
 
                     else:
                         pass#print("OLD", elem.text)
-
-    return root
-
-def reclassify(root, classifier, tei="{http://www.tei-c.org/ns/1.0}"):
-    prev_elem = None
-    for ix, elem_tuple in enumerate(list(_iter(root))):
-        tag, elem = elem_tuple
-
-        prev_elem = elem
-        if tag == "u":
-            for seg in elem:
-                paragraph = seg.text
-                c = classifier(paragraph)
-                if c != "u":
-                    print("Change u to note")
-                    prev_elem.addnext(seg)
-                    prev_elem = seg
-                    seg.tag = tei + c
-                elif prev_elem != elem:
-                    if prev_elem.tag == tei + "u":
-                        prev_elem.append(seg)
-                    else:
-                        new_elem = etree.Element(tei + "u")
-                        prev_elem.addnext(new_elem)
-                        prev_elem = new_elem
-                        prev_elem.append(seg)
-                else:
-                    pass
-
-        elif tag == "note":
-            paragraph = elem.text
-            c = classifier(paragraph)
-            if c != tag:                
-                if c == "u":
-                    elem.tag = tei + "seg"
-                    if prev_elem.tag == tei + "u":
-                        print("Change note to u")
-                    else:
-                        # Create new u node
-                        new_elem = etree.Element(tei + c)
-                        prev_elem.addnext(new_elem)
-                        prev_elem = new_elem
-
-                    prev_elem.append(elem)
-
-                else:
-                    prev_elem = elem
-                    elem.tag = tei + c
-            else:
-                prev_elem = elem
-        else:
-            prev_elem = elem
-    return root
-
-
-def format_paragraph(paragraph, spaces = 12):
-    words = paragraph.replace("\n", "").strip().split()
-    s = "\n" + " " * spaces
-    row = ""
-
-    for word in words:
-        if len(row) > 60:
-            s += row.strip() + "\n" + " " * spaces
-            row = word
-        else:
-            row += " " + word
-
-    if len(row.strip()) > 0:
-        s += row.strip() + "\n" + " " * (spaces - 2)
-
-    if s.strip() == "":
-        return None
-    return s
-
-def format_texts(root):
-    for tag, elem in _iter(root):
-
-        if type(elem.text) == str:
-            elem.text = format_paragraph(elem.text)
-        elif tag == "u":
-            if len(list(elem)) > 0:
-                for seg in elem:
-                    if type(seg.text) == str:
-                        seg.text = format_paragraph(seg.text, spaces=14)
-                    else:
-                        seg.text = None
-                elem.text = None
-            else:
-                elem.getparent().remove(elem)
-        elif tag == "pb":
-            if "{http://www.w3.org/XML/1998/namespace}url" in elem.attrib:
-                url = elem.attrib["{http://www.w3.org/XML/1998/namespace}url"]
-                del elem.attrib["{http://www.w3.org/XML/1998/namespace}url"]
-                elem.attrib["facs"] = url
 
     return root
 

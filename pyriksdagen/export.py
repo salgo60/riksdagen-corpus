@@ -10,48 +10,15 @@ from pyriksdagen.curation import apply_curations
 from pyriksdagen.segmentation import apply_instances
 from pyriksdagen.db import filter_db, year_iterator
 
-# Generate parla clarin header
-def _pc_header(metadata):
-    teiHeader = etree.Element("teiHeader")
-    
-    # fileDesc
-    fileDesc = etree.SubElement(teiHeader, "fileDesc")
-    
-    titleStmt = etree.SubElement(fileDesc, "titleStmt")
-    title = etree.SubElement(titleStmt, "title")
-    title.text = metadata.get("document_title", "N/A")
-    
-    if "edition" in metadata:
-        editionStmt = etree.SubElement(fileDesc, "editionStmt")
-        edition = etree.SubElement(editionStmt, "edition")
-        edition.text = metadata.get("edition", "N/A")
+from pyparlaclarin.create import pc_header
 
-    extent = etree.SubElement(fileDesc, "extent")
-    publicationStmt = etree.SubElement(fileDesc, "publicationStmt")
-    authority = etree.SubElement(publicationStmt, "authority")
-    authority.text = metadata.get("authority", "N/A")
-    
-    sourceDesc = etree.SubElement(fileDesc, "sourceDesc")
-    sourceBibl = etree.SubElement(sourceDesc, "bibl")
-    sourceTitle = etree.SubElement(sourceBibl, "title")
-    sourceTitle.text = metadata.get("document_title", "N/A")
-    
-    # encodingDesc
-    encodingDesc = etree.SubElement(teiHeader, "encodingDesc")
-    editorialDecl = etree.SubElement(encodingDesc, "editorialDecl")
-    correction = etree.SubElement(editorialDecl, "correction")
-    correction_p = etree.SubElement(correction, "p")
-    correction_p.text = metadata.get("correction", "No correction of source texts was performed.")
-    
-    return teiHeader
-    
 def create_parlaclarin(teis, metadata):
     if type(teis) != list:
         tei = teis
         return create_parlaclarin([tei], metadata)
     
     teiCorpus = etree.Element("teiCorpus", xmlns="http://www.tei-c.org/ns/1.0")
-    teiHeader = _pc_header(metadata)
+    teiHeader = pc_header(metadata)
     teiCorpus.append(teiHeader)
     
     for tei in teis:
@@ -81,7 +48,7 @@ def create_tei(root, metadata):
     tei = etree.Element("TEI")
     protocol_id = root.attrib["id"]
     metadata["document_title"] = protocol_id.replace("_", " ").split("-")[0].replace("prot", "Protokoll")
-    documentHeader = _pc_header(metadata)
+    documentHeader = pc_header(metadata)
     tei.append(documentHeader)
     
     text = etree.SubElement(tei, "text")
